@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-// Importando ícones (Se der erro no Sparkles, remova ele da lista e do código abaixo)
-import { Wind, Droplets, Thermometer, CloudSun, Sparkles } from "lucide-react";
+// Importando ícones, incluindo FileDown para o CSV
+import { Wind, Droplets, Thermometer, CloudSun, Sparkles, FileDown } from "lucide-react";
 
-// 1. Interface atualizada com o campo de IA
 interface WeatherData {
   _id: string;
   city: string;
@@ -13,7 +12,7 @@ interface WeatherData {
   humidity: number;
   windSpeed: number;
   condition: string;
-  insight?: string; // Opcional (?) para não quebrar se vier vazio
+  insight?: string;
   createdAt: string;
 }
 
@@ -35,10 +34,8 @@ function App() {
 
   const fetchData = async () => {
     try {
-      // 2. Pega o token para enviar na requisição
       const token = localStorage.getItem("gdash_token");
-
-      // Se não tiver token, o main.tsx já deveria ter barrado, mas garantimos aqui
+      // Se não tem token, não busca (evita erro 401 em loop)
       if (!token) return;
 
       const response = await axios.get("http://localhost:3000/weather", {
@@ -48,11 +45,34 @@ function App() {
       setData(response.data.reverse());
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
-      // 3. Se o token expirou (401), desloga
+      // Se der erro 401 (Token expirado), desloga
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         localStorage.removeItem("gdash_token");
         window.location.reload();
       }
+    }
+  };
+
+  // 👇 FUNÇÃO PARA BAIXAR O CSV
+  const handleDownloadCsv = async () => {
+    try {
+      const token = localStorage.getItem("gdash_token");
+      const response = await axios.get("http://localhost:3000/weather/export", {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: "blob", // Importante: diz pro axios que é um arquivo
+      });
+
+      // Truque para forçar o download no navegador
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "dados_climaticos.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Erro ao baixar CSV", error);
+      alert("Erro ao baixar o relatório. Tente novamente.");
     }
   };
 
@@ -73,9 +93,18 @@ function App() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
               GDASH Weather Station 🚀
             </h1>
-            <div className="flex items-center gap-4 mt-1">
-              <p className="text-slate-400 text-sm">Monitoramento em Tempo Real - Ipameri, GO</p>
-              {/* Botão Sair */}
+            <div className="flex items-center gap-4 mt-2">
+              <p className="text-slate-400 text-sm">Ipameri, GO</p>
+
+              {/* BOTÃO CSV (Verde) */}
+              <button
+                onClick={handleDownloadCsv}
+                className="flex items-center gap-1 text-xs text-green-400 hover:text-green-300 border border-green-900/50 px-2 py-0.5 rounded hover:bg-green-900/20 transition-colors cursor-pointer"
+              >
+                <FileDown size={14} /> CSV
+              </button>
+
+              {/* BOTÃO SAIR (Vermelho) */}
               <button
                 onClick={() => {
                   localStorage.removeItem("gdash_token");
@@ -89,13 +118,12 @@ function App() {
           </div>
           <div className="animate-pulse flex items-center bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
             <span className="inline-flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-            <span className="text-xs text-green-500 font-medium">Sistemas Online</span>
+            <span className="text-xs text-green-500 font-medium">Online</span>
           </div>
         </div>
 
-        {/* 4. NOVO CARD DE INSIGHT (IA) */}
-        {/* Renderiza APENAS se o campo 'insight' existir e não for vazio */}
-        {current && current.insight && (
+        {/* Card de Insight (IA) */}
+        {current?.insight && (
           <Card className="bg-gradient-to-r from-indigo-900 to-slate-900 border-indigo-500/30 shadow-lg">
             <CardHeader className="flex flex-row items-center gap-2 pb-2">
               <Sparkles className="h-5 w-5 text-yellow-400" />
@@ -145,7 +173,7 @@ function App() {
               <CloudSun className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-bold text-white mt-1">
+              <div className="text-lg font-bold text-white leading-none mt-1">
                 {current ? getWeatherDescription(current.condition) : "--"}
               </div>
             </CardContent>
@@ -164,12 +192,7 @@ function App() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
                   <XAxis
                     dataKey="createdAt"
-                    tickFormatter={(tick) =>
-                      new Date(tick).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    }
+                    tickFormatter={(t) => new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     stroke="#64748b"
                     tick={{ fontSize: 12 }}
                     interval="preserveStartEnd"
@@ -178,12 +201,12 @@ function App() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#0f172a",
-                      border: "1px solid #1e293b",
-                      borderRadius: "8px",
+                      borderColor: "#1e293b",
                       color: "#fff",
+                      borderRadius: "8px",
                     }}
-                    itemStyle={{ color: "#22d3ee" }}
                     labelStyle={{ color: "#94a3b8" }}
+                    itemStyle={{ color: "#22d3ee" }}
                     labelFormatter={(label) => new Date(label).toLocaleTimeString()}
                   />
                   <Line

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Header, Post } from '@nestjs/common';
 import { WeatherService } from './weather.service';
 
 @Controller('weather')
@@ -13,5 +13,13 @@ export class WeatherController {
   @Get()
   async findAll() {
     return this.weatherService.findAll();
+  }
+
+  // 👇 NOVA ROTA DE EXPORTAÇÃO
+  @Get('export')
+  @Header('Content-Type', 'text/csv')
+  @Header('Content-Disposition', 'attachment; filename=dados_climaticos.csv')
+  async exportCsv() {
+    return this.weatherService.getCsv();
   }
 }
