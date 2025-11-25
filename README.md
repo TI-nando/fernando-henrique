@@ -163,20 +163,8 @@ Invoke-RestMethod -Method Get -Uri http://localhost:3000/weather -Headers @{ Aut
 - Se o worker receber `401`, ele reautentica automaticamente e reenvia
 - Ajuste `COLLECTION_INTERVAL=60` no `.env` para acelerar dados em desenvolvimento
 
-## 📤 Entrega (Pull Request)
-
-- Crie uma branch com seu nome completo: `joao-silva` ou `maria-fernanda-souza`
-- Faça commit e push: `git add -A && git commit -m "Entrega GDASH" && git push -u origin sua-branch`
-- Abra o PR e inclua:
-  - Código completo (backend, frontend, python, go)
-  - `docker-compose.yml`
-  - `.env.example`
-  - Link do vídeo (YouTube não listado)
-  - Este README
-
 ## 📝 Autor
 
-Desenvolvido por [Seu Nome]
+Desenvolvido por [Fernando Henrique Silva]
 
-- LinkedIn: [Seu Link do LinkedIn]
-- GitHub: [Seu Link do GitHub]
+- LinkedIn: https://www.linkedin.com/in/fernandohenrique-dev
