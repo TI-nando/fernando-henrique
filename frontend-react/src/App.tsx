@@ -1,15 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Wind, Droplets, Thermometer, CloudSun } from "lucide-react";
 
 interface WeatherData {
@@ -42,10 +34,22 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/weather");
+      // Pega o token salvo no login
+      const token = localStorage.getItem("gdash_token");
+
+      // Envia o token no cabeçalho para o Backend autorizar
+      const response = await axios.get("http://localhost:3000/weather", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setData(response.data.reverse());
     } catch (error) {
       console.error("Erro ao buscar dados:", error);
+      // Se o token for inválido (401), desloga o usuário
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        localStorage.removeItem("gdash_token");
+        window.location.reload();
+      }
     }
   };
 
@@ -66,15 +70,23 @@ function App() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
               GDASH Weather Station 🚀
             </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Monitoramento em Tempo Real - Ipameri, GO
-            </p>
+            <div className="flex items-center gap-4 mt-1">
+              <p className="text-slate-400 text-sm">Monitoramento em Tempo Real - Ipameri, GO</p>
+              {/* BOTÃO DE SAIR ADICIONADO AQUI 👇 */}
+              <button
+                onClick={() => {
+                  localStorage.removeItem("gdash_token");
+                  window.location.reload();
+                }}
+                className="text-xs text-red-400 hover:text-red-300 border border-red-900/50 px-2 py-0.5 rounded hover:bg-red-900/20 transition-colors cursor-pointer"
+              >
+                Sair
+              </button>
+            </div>
           </div>
           <div className="animate-pulse flex items-center bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
             <span className="inline-flex h-2 w-2 rounded-full bg-green-500 mr-2"></span>
-            <span className="text-xs text-green-500 font-medium">
-              Sistemas Online
-            </span>
+            <span className="text-xs text-green-500 font-medium">Sistemas Online</span>
           </div>
         </div>
 
@@ -82,55 +94,40 @@ function App() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-slate-900 border-slate-800 shadow-lg hover:border-slate-700 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-400">
-                Temperatura
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Temperatura</CardTitle>
               <Thermometer className="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
-                {current?.temperature ?? "--"}°C
-              </div>
+              <div className="text-3xl font-bold text-white">{current?.temperature ?? "--"}°C</div>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-900 border-slate-800 shadow-lg hover:border-slate-700 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-400">
-                Umidade
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Umidade</CardTitle>
               <Droplets className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
-                {current?.humidity ?? "--"}%
-              </div>
+              <div className="text-3xl font-bold text-white">{current?.humidity ?? "--"}%</div>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-900 border-slate-800 shadow-lg hover:border-slate-700 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-400">
-                Vento
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Vento</CardTitle>
               <Wind className="h-4 w-4 text-cyan-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-white">
-                {current?.windSpeed ?? "--"} km/h
-              </div>
+              <div className="text-3xl font-bold text-white">{current?.windSpeed ?? "--"} km/h</div>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-900 border-slate-800 shadow-lg hover:border-slate-700 transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-400">
-                Condição
-              </CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-400">Condição</CardTitle>
               <CloudSun className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              {/* AQUI APLICAMOS A TRADUÇÃO 👇 */}
               <div className="text-xl font-bold text-white mt-1">
                 {current ? getWeatherDescription(current.condition) : "--"}
               </div>
@@ -141,19 +138,13 @@ function App() {
         {/* Gráfico */}
         <Card className="bg-slate-900 border-slate-800 col-span-4 shadow-xl">
           <CardHeader>
-            <CardTitle className="text-white">
-              Histórico de Temperatura
-            </CardTitle>
+            <CardTitle className="text-white">Histórico de Temperatura</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#334155"
-                    opacity={0.3}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
                   <XAxis
                     dataKey="createdAt"
                     tickFormatter={(tick) =>
@@ -176,9 +167,7 @@ function App() {
                     }}
                     itemStyle={{ color: "#22d3ee" }}
                     labelStyle={{ color: "#94a3b8" }}
-                    labelFormatter={(label) =>
-                      new Date(label).toLocaleTimeString()
-                    }
+                    labelFormatter={(label) => new Date(label).toLocaleTimeString()}
                   />
                   <Line
                     type="monotone"
