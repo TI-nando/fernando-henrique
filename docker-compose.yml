@@ -1,0 +1,83 @@
+version: "3.8"
+
+services:
+  # -----------------------
+  # INFRAESTRUTURA
+  # -----------------------
+  mongodb:
+    image: mongo:6.0
+    container_name: gdash_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+    volumes:
+      - mongo_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: gdash_rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password123
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -----------------------
+  # APLICAÇÕES
+  # -----------------------
+
+  # 1. API NestJS
+  backend:
+    build: ./backend-nest
+    container_name: gdash_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    environment:
+      # Opcional: Variáveis de ambiente se quiser deixar dinâmico
+      MONGO_URI: mongodb://admin:password123@mongodb:27017/gdash?authSource=admin
+
+  # 2. Worker Go
+  worker:
+    build: ./worker-go
+    container_name: gdash_worker
+    restart: always
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      backend:
+        condition: service_started
+
+  # 3. Coletor Python
+  collector:
+    build: ./weather-collector-python
+    container_name: gdash_collector
+    restart: always
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # 4. Frontend React
+  frontend:
+    build: ./frontend-react
+    container_name: gdash_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:

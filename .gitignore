@@ -1,0 +1,21 @@
+# Dependências do Node (Backend e Frontend)
+node_modules/
+dist/
+build/
+.env
+
+# Python (Coletor)
+__pycache__/
+*.pyc
+venv/
+.pytest_cache/
+
+# Go (Worker)
+worker-go/worker
+worker-go/worker.exe
+
+# Docker e Logs
+.idea/
+.vscode/
+*.log
+mongo_data/
