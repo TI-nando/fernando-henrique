@@ -75,6 +75,24 @@ Na primeira execução, aguarde o download das imagens e a compilação dos serv
 - API (Backend): `http://localhost:3000/api`
 - RabbitMQ Manager: `http://localhost:15672` (User: `admin` / Pass: `password123`)
 
+### Variáveis de Ambiente
+
+Use o arquivo `.env.example` como base para criar seu `.env`:
+
+```
+MONGO_URL=mongodb://admin:password123@mongo:27017/weatherdb?authSource=admin
+RABBITMQ_URL=amqp://admin:password123@rabbitmq:5672
+RABBITMQ_QUEUE=weather_data
+JWT_SECRET=changeme
+DEFAULT_USER_EMAIL=admin@example.com
+DEFAULT_USER_PASSWORD=123456
+OPEN_METEO_URL=https://api.open-meteo.com/v1/forecast
+LOCATION_LAT=-23.5505
+LOCATION_LON=-46.6333
+COLLECTION_INTERVAL=3600
+VITE_API_URL=/api
+```
+
 ## 📂 Estrutura do Projeto
 
 ```
@@ -91,6 +109,70 @@ gdash-weather-station/
 - Resiliência: o Worker em Go possui lógica de retry e ack/nack manual; se a API estiver fora do ar, a mensagem volta para a fila
 - Tradução WMO: o Frontend implementa a tabela da Organização Meteorológica Mundial para traduzir códigos numéricos (ex.: `2`) para descrições humanas ("Parcialmente Nublado ⛅")
 - Networking Docker: os serviços se comunicam via rede interna do Docker (`http://backend-nest:3000`, `amqp://rabbitmq`), isolados do host
+
+## 🧩 Serviços e Endpoints
+
+- Backend (NestJS) `backend-nest/`
+  - Porta: `3000`
+  - Principais rotas:
+    - `POST /auth/login` (gera token JWT)
+    - `GET /weather` (lista dados)
+    - `POST /weather` (insere dado)
+    - `GET /weather/export` (CSV)
+- Frontend (React/Vite) `frontend-react/`
+  - Porta: `5173`
+  - Páginas: Login (`/login`) e Dashboard (`/`)
+- Coletor (Python) `weather-collector-python/`
+  - Publica JSON na fila `weather_data`
+- Worker (Go) `worker-go/`
+  - Consome a fila e envia `POST` para a API
+
+## 🔧 Rodar serviços individualmente
+
+- Frontend: `docker compose up -d frontend`
+- API: `docker compose up -d backend`
+- Coletor: `docker compose up -d collector`
+- Worker: `docker compose up -d worker`
+
+## 🔗 URLs Principais
+
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:3000`
+- RabbitMQ UI: `http://localhost:15672` (admin/password123)
+
+## 👤 Usuário Padrão
+
+- Email: `admin@example.com`
+- Senha: `123456`
+
+## 🧪 Testes rápidos
+
+Autenticação e listagem via PowerShell:
+
+```powershell
+$body = @{ email = 'admin@example.com'; password = '123456' } | ConvertTo-Json
+$login = Invoke-RestMethod -Method Post -Uri http://localhost:3000/auth/login -ContentType 'application/json' -Body $body
+$token = $login.access_token
+Invoke-RestMethod -Method Get -Uri http://localhost:3000/weather -Headers @{ Authorization = "Bearer $token" }
+```
+
+## 🛠️ Troubleshooting
+
+- Se o login não avançar, limpe o token do navegador:
+  - `localStorage.removeItem('gdash_token')` e recarregue
+- Se o worker receber `401`, ele reautentica automaticamente e reenvia
+- Ajuste `COLLECTION_INTERVAL=60` no `.env` para acelerar dados em desenvolvimento
+
+## 📤 Entrega (Pull Request)
+
+- Crie uma branch com seu nome completo: `joao-silva` ou `maria-fernanda-souza`
+- Faça commit e push: `git add -A && git commit -m "Entrega GDASH" && git push -u origin sua-branch`
+- Abra o PR e inclua:
+  - Código completo (backend, frontend, python, go)
+  - `docker-compose.yml`
+  - `.env.example`
+  - Link do vídeo (YouTube não listado)
+  - Este README
 
 ## 📝 Autor
 
