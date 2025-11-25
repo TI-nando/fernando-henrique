@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="360" viewBox="0 0 1100 360">
+  <rect width="1100" height="360" fill="#0f172a"/>
+  <style>
+    .box { fill:#111827; stroke:#1f2937; stroke-width:2; rx:12; }
+    .title { fill:#e5e7eb; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; font-size:16px; font-weight:600; }
+    .subtitle { fill:#94a3b8; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; font-size:14px; }
+    .arrow { stroke:#22d3ee; stroke-width:3; marker-end:url(#arrowHead); }
+    .arrow2 { stroke:#f59e0b; stroke-width:3; marker-end:url(#arrowHead2); }
+  </style>
+  <defs>
+    <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6" fill="#22d3ee"/>
+    </marker>
+    <marker id="arrowHead2" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6" fill="#f59e0b"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="60" y="60" width="200" height="90"/>
+  <text class="title" x="80" y="95">Python Collector</text>
+  <text class="subtitle" x="80" y="120">Open‑Meteo → JSON</text>
+
+  <rect class="box" x="320" y="60" width="200" height="90"/>
+  <text class="title" x="340" y="95">RabbitMQ</text>
+  <text class="subtitle" x="340" y="120">Queue: weather_data</text>
+
+  <rect class="box" x="580" y="60" width="200" height="90"/>
+  <text class="title" x="600" y="95">Go Worker</text>
+  <text class="subtitle" x="600" y="120">Ack/Nack + Retry</text>
+
+  <rect class="box" x="840" y="60" width="200" height="90"/>
+  <text class="title" x="860" y="95">NestJS API</text>
+  <text class="subtitle" x="860" y="120">/api/weather/logs</text>
+
+  <rect class="box" x="840" y="200" width="200" height="90"/>
+  <text class="title" x="860" y="235">MongoDB</text>
+  <text class="subtitle" x="860" y="260">Weather collection</text>
+
+  <rect class="box" x="580" y="200" width="200" height="90"/>
+  <text class="title" x="600" y="235">React Frontend</text>
+  <text class="subtitle" x="600" y="260">Dashboard + Exports</text>
+
+  <line class="arrow" x1="260" y1="105" x2="320" y2="105"/>
+  <line class="arrow" x1="520" y1="105" x2="580" y2="105"/>
+  <line class="arrow2" x1="780" y1="105" x2="840" y2="105"/>
+  <line class="arrow" x1="940" y1="150" x2="940" y2="200"/>
+  <line class="arrow2" x1="680" y1="200" x2="680" y2="150"/>
+  <text class="subtitle" x="300" y="85" fill="#22d3ee">JSON</text>
+  <text class="subtitle" x="560" y="85" fill="#22d3ee">Consume</text>
+  <text class="subtitle" x="820" y="85" fill="#f59e0b">POST</text>
+  <text class="subtitle" x="950" y="175" fill="#22d3ee">Persist</text>
+  <text class="subtitle" x="690" y="175" fill="#f59e0b">GET</text>
+</svg>

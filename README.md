@@ -12,9 +12,9 @@ Uma solução Full Stack distribuída para monitoramento climático em tempo rea
   <a href="https://www.docker.com/" title="Docker"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" width="40"/></a>
 </p>
 
-> Coloque um print da sua tela aqui
->
-> `![Dashboard](./docs/screenshot.png)`
+<p align="center">
+  <img src="frontend-react/src/img/dashbord.png" alt="Dashboard" width="900"/>
+</p>
 
 ## 🧭 Sobre o Projeto
 
@@ -24,16 +24,9 @@ A aplicação coleta dados meteorológicos, processa em filas de alta performanc
 
 ## 🏗️ Arquitetura e Fluxo de Dados
 
-O sistema opera em um ciclo contínuo de Extração, Processamento e Visualização:
-
-```mermaid
-graph LR
-  A[Python Collector] -- JSON --> B(RabbitMQ)
-  B -- Queue --> C[Go Worker]
-  C -- POST --> D[NestJS API]
-  D -- Persist --> E[(MongoDB)]
-  F[React Frontend] -- GET --> D
-```
+<p align="center">
+  <img src="docs/architecture.svg" alt="Arquitetura e Fluxo" width="900"/>
+</p>
 
 - Coleta (Python): um script agendado busca dados da Open-Meteo API
 - Mensageria (RabbitMQ): garante desacoplamento e resiliência dos dados
