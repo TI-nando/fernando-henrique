@@ -165,6 +165,6 @@ Invoke-RestMethod -Method Get -Uri http://localhost:3000/weather -Headers @{ Aut
 
 ## 📝 Autor
 
-Desenvolvido por [Fernando Henrique Silva]
+Desenvolvido por Fernando Henrique Silva
 
 - LinkedIn: https://www.linkedin.com/in/fernandohenrique-dev
