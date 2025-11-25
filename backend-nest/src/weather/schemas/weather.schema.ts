@@ -19,6 +19,9 @@ export class Weather {
 
   @Prop()
   condition: string;
+
+  @Prop()
+  insight: string;
 }
 
 export const WeatherSchema = SchemaFactory.createForClass(Weather);
